@@ -1,7 +1,8 @@
 package db
 
 import (
-	util "GoAudio/db/util"
+	util "github.com/QuyenFunc/Goaudio/db/util"
+
 	"database/sql"
 	"log"
 	"os"

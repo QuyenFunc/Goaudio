@@ -11,22 +11,21 @@ import (
 
 const createProducte = `-- name: CreateProducte :one
 INSERT INTO productes (
-    catalog_id, name, price,created,view,
+    catalog_id, name, price,view,
     content,discount,image_link,image_list
 ) VALUES (
-             $1,$2,$3, $4,$5,$6, $7,$8,$9
+             $1,$2,$3,$4,$5,$6,$7,$8
          )
-RETURNING id, catalog_id, name, price, content, discount, image_link, image_list, created, view
+RETURNING id, catalog_id, name, price, view, content, discount, image_link, image_list, created_at
 `
 
 type CreateProducteParams struct {
-	CatalogID int32  `json:"catalog_id"`
+	CatalogID int64  `json:"catalog_id"`
 	Name      string `json:"name"`
-	Price     int32  `json:"price"`
-	Created   int32  `json:"created"`
-	View      int32  `json:"view"`
+	Price     int64  `json:"price"`
+	View      int64  `json:"view"`
 	Content   string `json:"content"`
-	Discount  int32  `json:"discount"`
+	Discount  string `json:"discount"`
 	ImageLink string `json:"image_link"`
 	ImageList string `json:"image_list"`
 }
@@ -36,7 +35,6 @@ func (q *Queries) CreateProducte(ctx context.Context, arg CreateProducteParams) 
 		arg.CatalogID,
 		arg.Name,
 		arg.Price,
-		arg.Created,
 		arg.View,
 		arg.Content,
 		arg.Discount,
@@ -49,37 +47,31 @@ func (q *Queries) CreateProducte(ctx context.Context, arg CreateProducteParams) 
 		&i.CatalogID,
 		&i.Name,
 		&i.Price,
+		&i.View,
 		&i.Content,
 		&i.Discount,
 		&i.ImageLink,
 		&i.ImageList,
-		&i.Created,
-		&i.View,
+		&i.CreatedAt,
 	)
 	return i, err
 }
 
 const deleteProductes = `-- name: DeleteProductes :exec
-
 DELETE FROM productes WHERE id = $1
 `
 
-// -- name: UpdateProductes :one
-// UPDATE productes
-// SET balance = $2
-// WHERE id = $1
-// RETURNING *;
-func (q *Queries) DeleteProductes(ctx context.Context, id int32) error {
+func (q *Queries) DeleteProductes(ctx context.Context, id int64) error {
 	_, err := q.db.ExecContext(ctx, deleteProductes, id)
 	return err
 }
 
 const getProducte = `-- name: GetProducte :one
-SELECT id, catalog_id, name, price, content, discount, image_link, image_list, created, view FROM productes
+SELECT id, catalog_id, name, price, view, content, discount, image_link, image_list, created_at FROM productes
 WHERE id = $1 LIMIT 1
 `
 
-func (q *Queries) GetProducte(ctx context.Context, id int32) (Producte, error) {
+func (q *Queries) GetProducte(ctx context.Context, id int64) (Producte, error) {
 	row := q.db.QueryRowContext(ctx, getProducte, id)
 	var i Producte
 	err := row.Scan(
@@ -87,23 +79,23 @@ func (q *Queries) GetProducte(ctx context.Context, id int32) (Producte, error) {
 		&i.CatalogID,
 		&i.Name,
 		&i.Price,
+		&i.View,
 		&i.Content,
 		&i.Discount,
 		&i.ImageLink,
 		&i.ImageList,
-		&i.Created,
-		&i.View,
+		&i.CreatedAt,
 	)
 	return i, err
 }
 
 const getProductesForUpdate = `-- name: GetProductesForUpdate :one
-SELECT id, catalog_id, name, price, content, discount, image_link, image_list, created, view FROM productes
+SELECT id, catalog_id, name, price, view, content, discount, image_link, image_list, created_at FROM productes
 WHERE id = $1 LIMIT 1
     FOR NO KEY UPDATE
 `
 
-func (q *Queries) GetProductesForUpdate(ctx context.Context, id int32) (Producte, error) {
+func (q *Queries) GetProductesForUpdate(ctx context.Context, id int64) (Producte, error) {
 	row := q.db.QueryRowContext(ctx, getProductesForUpdate, id)
 	var i Producte
 	err := row.Scan(
@@ -111,30 +103,32 @@ func (q *Queries) GetProductesForUpdate(ctx context.Context, id int32) (Producte
 		&i.CatalogID,
 		&i.Name,
 		&i.Price,
+		&i.View,
 		&i.Content,
 		&i.Discount,
 		&i.ImageLink,
 		&i.ImageList,
-		&i.Created,
-		&i.View,
+		&i.CreatedAt,
 	)
 	return i, err
 }
 
 const listProductes = `-- name: ListProductes :many
-SELECT id, catalog_id, name, price, content, discount, image_link, image_list, created, view FROM productes
+SELECT id, catalog_id, name, price, view, content, discount, image_link, image_list, created_at FROM productes
+WHERE name = $1
 ORDER BY id
-LIMIT $1
-    OFFSET $2
+LIMIT $2
+OFFSET $3
 `
 
 type ListProductesParams struct {
-	Limit  int32 `json:"limit"`
-	Offset int32 `json:"offset"`
+	Name   string `json:"name"`
+	Limit  int32  `json:"limit"`
+	Offset int32  `json:"offset"`
 }
 
 func (q *Queries) ListProductes(ctx context.Context, arg ListProductesParams) ([]Producte, error) {
-	rows, err := q.db.QueryContext(ctx, listProductes, arg.Limit, arg.Offset)
+	rows, err := q.db.QueryContext(ctx, listProductes, arg.Name, arg.Limit, arg.Offset)
 	if err != nil {
 		return nil, err
 	}
@@ -147,12 +141,12 @@ func (q *Queries) ListProductes(ctx context.Context, arg ListProductesParams) ([
 			&i.CatalogID,
 			&i.Name,
 			&i.Price,
+			&i.View,
 			&i.Content,
 			&i.Discount,
 			&i.ImageLink,
 			&i.ImageList,
-			&i.Created,
-			&i.View,
+			&i.CreatedAt,
 		); err != nil {
 			return nil, err
 		}
@@ -165,4 +159,46 @@ func (q *Queries) ListProductes(ctx context.Context, arg ListProductesParams) ([
 		return nil, err
 	}
 	return items, nil
+}
+
+const updateProductes = `-- name: UpdateProductes :one
+UPDATE productes
+SET catalog_id = $2,
+    price = $3,
+    view = $4,
+    discount = $5
+WHERE id = $1
+RETURNING id, catalog_id, name, price, view, content, discount, image_link, image_list, created_at
+`
+
+type UpdateProductesParams struct {
+	ID        int64  `json:"id"`
+	CatalogID int64  `json:"catalog_id"`
+	Price     int64  `json:"price"`
+	View      int64  `json:"view"`
+	Discount  string `json:"discount"`
+}
+
+func (q *Queries) UpdateProductes(ctx context.Context, arg UpdateProductesParams) (Producte, error) {
+	row := q.db.QueryRowContext(ctx, updateProductes,
+		arg.ID,
+		arg.CatalogID,
+		arg.Price,
+		arg.View,
+		arg.Discount,
+	)
+	var i Producte
+	err := row.Scan(
+		&i.ID,
+		&i.CatalogID,
+		&i.Name,
+		&i.Price,
+		&i.View,
+		&i.Content,
+		&i.Discount,
+		&i.ImageLink,
+		&i.ImageList,
+		&i.CreatedAt,
+	)
+	return i, err
 }

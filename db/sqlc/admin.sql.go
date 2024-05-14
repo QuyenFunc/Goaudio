@@ -15,7 +15,7 @@ INSERT INTO Admin (
 ) VALUES (
              $1,$2,$3
          )
-RETURNING id, username, password, name
+RETURNING id, username, password, name, created_at
 `
 
 type CreateAdminParams struct {
@@ -32,6 +32,7 @@ func (q *Queries) CreateAdmin(ctx context.Context, arg CreateAdminParams) (Admin
 		&i.Username,
 		&i.Password,
 		&i.Name,
+		&i.CreatedAt,
 	)
 	return i, err
 }
@@ -40,17 +41,17 @@ const deleteAdmin = `-- name: DeleteAdmin :exec
 DELETE FROM Admin WHERE id = $1
 `
 
-func (q *Queries) DeleteAdmin(ctx context.Context, id int32) error {
+func (q *Queries) DeleteAdmin(ctx context.Context, id int64) error {
 	_, err := q.db.ExecContext(ctx, deleteAdmin, id)
 	return err
 }
 
 const getAdmin = `-- name: GetAdmin :one
-SELECT id, username, password, name FROM Admin
+SELECT id, username, password, name, created_at FROM Admin
 WHERE id = $1 LIMIT 1
 `
 
-func (q *Queries) GetAdmin(ctx context.Context, id int32) (Admin, error) {
+func (q *Queries) GetAdmin(ctx context.Context, id int64) (Admin, error) {
 	row := q.db.QueryRowContext(ctx, getAdmin, id)
 	var i Admin
 	err := row.Scan(
@@ -58,6 +59,7 @@ func (q *Queries) GetAdmin(ctx context.Context, id int32) (Admin, error) {
 		&i.Username,
 		&i.Password,
 		&i.Name,
+		&i.CreatedAt,
 	)
 	return i, err
 }

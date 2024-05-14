@@ -13,24 +13,19 @@ type Querier interface {
 	CreateCatalog(ctx context.Context, arg CreateCatalogParams) (Cataloge, error)
 	CreateProducte(ctx context.Context, arg CreateProducteParams) (Producte, error)
 	CreateUser(ctx context.Context, arg CreateUserParams) (User, error)
-	DeleteAdmin(ctx context.Context, id int32) error
-	DeleteCataloges(ctx context.Context, id int32) error
-	// -- name: UpdateProductes :one
-	// UPDATE productes
-	// SET balance = $2
-	// WHERE id = $1
-	// RETURNING *;
-	DeleteProductes(ctx context.Context, id int32) error
-	DeleteUser(ctx context.Context, id int32) error
-	GetAccount(ctx context.Context, id int32) (Cataloge, error)
-	GetAdmin(ctx context.Context, id int32) (Admin, error)
-	GetCatalogesForUpdate(ctx context.Context, id int32) (Cataloge, error)
-	GetProducte(ctx context.Context, id int32) (Producte, error)
-	GetProductesForUpdate(ctx context.Context, id int32) (Producte, error)
-	GetUser(ctx context.Context, id int32) (User, error)
-	ListCataloges(ctx context.Context, arg ListCatalogesParams) ([]Cataloge, error)
+	DeleteAdmin(ctx context.Context, id int64) error
+	DeleteProductes(ctx context.Context, id int64) error
+	DeleteUser(ctx context.Context, id int64) error
+	GetAdmin(ctx context.Context, id int64) (Admin, error)
+	GetCatalog(ctx context.Context, id int64) (Cataloge, error)
+	GetCatalogesForUpdate(ctx context.Context, id int64) (Cataloge, error)
+	GetProducte(ctx context.Context, id int64) (Producte, error)
+	GetProductesForUpdate(ctx context.Context, id int64) (Producte, error)
+	GetUser(ctx context.Context, name string) (User, error)
 	ListProductes(ctx context.Context, arg ListProductesParams) ([]Producte, error)
 	ListUsers(ctx context.Context, arg ListUsersParams) ([]User, error)
+	UpdateCatalog(ctx context.Context, arg UpdateCatalogParams) (Cataloge, error)
+	UpdateProductes(ctx context.Context, arg UpdateProductesParams) (Producte, error)
 }
 
 var _ Querier = (*Queries)(nil)

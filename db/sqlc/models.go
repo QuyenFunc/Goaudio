@@ -4,39 +4,45 @@
 
 package db
 
+import (
+	"time"
+)
+
 type Admin struct {
-	ID       int32  `json:"id"`
-	Username string `json:"username"`
-	Password string `json:"password"`
-	Name     string `json:"name"`
+	ID        int64     `json:"id"`
+	Username  string    `json:"username"`
+	Password  string    `json:"password"`
+	Name      string    `json:"name"`
+	CreatedAt time.Time `json:"created_at"`
 }
 
 type Cataloge struct {
-	ID        int32  `json:"id"`
+	ID        int64  `json:"id"`
 	Name      string `json:"name"`
-	ParentID  int32  `json:"parent_id"`
+	ParentID  int64  `json:"parent_id"`
 	SortOrder int16  `json:"sort_order"`
 }
 
 type Producte struct {
-	ID        int32  `json:"id"`
-	CatalogID int32  `json:"catalog_id"`
-	Name      string `json:"name"`
-	Price     int32  `json:"price"`
-	Content   string `json:"content"`
-	Discount  int32  `json:"discount"`
-	ImageLink string `json:"image_link"`
-	ImageList string `json:"image_list"`
-	Created   int32  `json:"created"`
-	View      int32  `json:"view"`
+	ID        int64     `json:"id"`
+	CatalogID int64     `json:"catalog_id"`
+	Name      string    `json:"name"`
+	Price     int64     `json:"price"`
+	View      int64     `json:"view"`
+	Content   string    `json:"content"`
+	Discount  string    `json:"discount"`
+	ImageLink string    `json:"image_link"`
+	ImageList string    `json:"image_list"`
+	CreatedAt time.Time `json:"created_at"`
 }
 
 type User struct {
-	ID       int32  `json:"id"`
-	Name     string `json:"name"`
-	Email    string `json:"email"`
-	Phone    string `json:"phone"`
-	Address  string `json:"address"`
-	Password string `json:"password"`
-	Created  int32  `json:"created"`
+	ID                int64     `json:"id"`
+	Name              string    `json:"name"`
+	Email             string    `json:"email"`
+	Phone             string    `json:"phone"`
+	Address           string    `json:"address"`
+	HashedPassword    string    `json:"hashed_password"`
+	PasswordChangedAt time.Time `json:"password_changed_at"`
+	CreatedAt         time.Time `json:"created_at"`
 }
